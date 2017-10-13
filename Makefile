@@ -13,17 +13,19 @@ LDFLAGS := -L$(CPPUTEST_HOME)/lib -lCppUTest
 
 SRC_DIR := src/
 OBJ_DIR := objs/
+OBJTST_DIR := objs/tests/
 SRC_FILES := $(wildcard $(SRC_DIR)*.c)
-OBJ_FILES := $(patsubst $(SRC_DIR)%.c,$(OBJ_DIR)/%.o,$(SRC_FILES))
+OBJ_FILES := $(patsubst $(SRC_DIR)%.c,$(OBJ_DIR)%.o,$(SRC_FILES))
 
 
 TST_FILES := $(wildcard tests/*.c)
-TST_OBJ_FILES := $(patsubst tests/%.c, objs/tests/%.o,$(TST_FILES))
+TST_OBJ_FILES := $(patsubst tests/%.c, $(OBJTST_DIR)%.o,$(TST_FILES))
 
 
 ALL_TESTS := run_all.c
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)%.c
+$(OBJ_DIR)%.o: $(SRC_DIR)%.c
+	mkdir -p $(OBJTST_DIR)
 	$(CC) $(CFLAGS) $(CXXFLAGS) -c -o $@ $<
 
 
@@ -38,10 +40,8 @@ objs/tests/%.o: tests/%.c
 
 
 run: test
-	$(OBJ_DIR)/test
+	$(OBJ_DIR)$<
 .PHONY: clean
 clean:
 	@echo "clean..."
-	rm -f $(OBJ_DIR)test
-	rm -f $(OBJ_DIR)*.o
-	rm -f $(OBJ_DIR)tests/*.o
+	rm -rf $(OBJ_DIR)
