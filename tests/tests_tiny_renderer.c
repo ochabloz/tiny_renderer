@@ -45,7 +45,22 @@ TEST(renderer, draw_a_line){
     bmp_file_delete(f);
 }
 
-TEST(renderer, test_render_obj){
+
+TEST(renderer, draw_a_triangle){
+    f = bmp_file_create(200,200);
+    vec2i_t t0[3] = {vec2i_create(10, 70),   vec2i_create(50, 160),  vec2i_create(70, 80)};
+    vec2i_t t1[3] = {vec2i_create(180, 50),  vec2i_create(150, 1),   vec2i_create(70, 180)};
+    vec2i_t t2[3] = {vec2i_create(180, 150), vec2i_create(120, 160), vec2i_create(130, 180)};
+    draw_triangle(f, t0, 0xFF0000);
+    draw_triangle(f, t1, 0xFFFFFF);
+    draw_triangle(f, t2, 0x00FF00);
+
+    bmp_file_save(f, "test_renderer_triangle.bmp");
+    bmp_file_delete(f);
+}
+
+
+IGNORE_TEST(renderer, test_render_obj){
     bmp_file_t ren = bmp_file_create(1200,1200);
     render_obj(ren, "objects/african_head.obj", 1200, 1200);
     bmp_file_save(ren, "diablo_renderer.bmp");

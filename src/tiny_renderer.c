@@ -44,25 +44,29 @@ void swap(int *a, int *b){
 }
 
 void draw_line(void* data, vec2i_t v0, vec2i_t v1, int color){
+    int x0 = v0->x;
+    int x1 = v1->x;
+    int y0 = v0->y;
+    int y1 = v1->y;
     // 1st check if the line is steep
     //(the difference between y0 and y1 is greater than between x0 and x1)
     int transposed = 0;
-    if(abs(v0->x - v1->x) < abs(v0->y - v1->y)){
+    if(abs(x0-x1) < abs(y0-y1)){
         // then we transpose the line
-        swap(&(v0->x), &(v0->y));
-        swap(&(v1->x), &(v1->y));
+        swap(&x0, &y0);
+        swap(&x1, &y1);
         transposed = 1;
     }
-    if(v1->x < v0->x){
-        swap(&(v1->x), &(v0->x));
-        swap(&(v1->y), &(v0->y));
+    if(x1 < x0){
+        swap(&x1, &x0);
+        swap(&y1, &y0);
     }
-    int dx = v1->x - v0->x;
-    int dy = v1->y - v0->y;
+    int dx = x1-x0;
+    int dy = y1-y0;
     int delta_error = abs(dy) * 2;
     int error = 0;
-    int y = v0->y;
-    for(int i = v0->x; i <= v1->x; i++){
+    int y = y0;
+    for(int i = x0; i <= x1; i++){
         if(transposed){
             DRAW(y, i, color);
         }
@@ -71,15 +75,17 @@ void draw_line(void* data, vec2i_t v0, vec2i_t v1, int color){
         }
         error += delta_error;
         if(error > dx){
-            y += (v1->y > v0->y ? 1 : -1);
+            y += (y1>y0 ? 1 : -1);
             error -= dx * 2;
         }
     }
 }
 
 
-void draw_triangle(void* data, int x0, int y0 ){
-    x0;
+void draw_triangle(void* data, vec2i_t * t, int color){
+    draw_line(data, t[0], t[1], color);
+    draw_line(data, t[1], t[2], color);
+    draw_line(data, t[2], t[0], color);
 }
 
 void render_obj(void* data, const char * filename, int height, int width){
