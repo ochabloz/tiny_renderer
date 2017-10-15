@@ -22,8 +22,6 @@ TST_FILES := $(wildcard tests/*.c)
 TST_OBJ_FILES := $(patsubst tests/%.c, $(OBJTST_DIR)%.o,$(TST_FILES))
 
 
-ALL_TESTS := run_all.c
-
 $(OBJ_DIR)%.o: $(SRC_DIR)%.c
 	mkdir -p $(OBJTST_DIR)
 	$(CC) $(CFLAGS) $(CXXFLAGS) -c -o $@ $<
@@ -38,10 +36,11 @@ objs/tests/%.o: tests/%.c
 	$(CPP) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
 
 
-
-run: test
+all: test
 	$(OBJ_DIR)$<
+
 .PHONY: clean
 clean:
 	@echo "clean..."
 	rm -rf $(OBJ_DIR)
+	rm *.bmp

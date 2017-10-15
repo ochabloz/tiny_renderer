@@ -17,9 +17,13 @@ bmp_file_t f = NULL;
 
 
 void test_draw_line(bmp_file_t f, uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint32_t c){
-    draw_line(f, x0, y0, x1, y1, c);
-    CHECK(c == bmp_file_read(f,  x0,  y0));
-    CHECK(c == bmp_file_read(f, x1, y1));
+    vec2i_t p0 = vec2i_create(x0, y0);
+    vec2i_t p1 = vec2i_create(x1, y1);
+    draw_line(f, p0, p1, c);
+    LONGS_EQUAL(c, bmp_file_read(f,  x0,  y0));
+    LONGS_EQUAL(c, bmp_file_read(f, x1, y1));
+    vec2i_destroy(p0);
+    vec2i_destroy(p1);
 }
 
 TEST(renderer, draw_a_line){
