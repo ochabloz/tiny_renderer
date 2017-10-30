@@ -81,11 +81,44 @@ void draw_line(void* data, vec2i_t v0, vec2i_t v1, int color){
     }
 }
 
+void vec2i_swap(vec2i_t a, vec2i_t b){ // a améliorer en utilisant les pointeurs
+    struct vec2i_struct c = {a->x, a->y};
+    a->x = b->x;
+    a->y = b->y;
+    b->x = c.x;
+    b->y = c.y;
+}
 
 void draw_triangle(void* data, vec2i_t * t, int color){
-    draw_line(data, t[0], t[1], color);
-    draw_line(data, t[1], t[2], color);
-    draw_line(data, t[2], t[0], color);
+    // 1) sort vertices from lower (t0) to upper (t2)
+    if(t[0]->y > t[1]->y) vec2i_swap(t[0], t[1]);
+    if(t[0]->y > t[2]->y) vec2i_swap(t[0], t[2]);
+    if(t[1]->y > t[2]->y) vec2i_swap(t[1], t[2]);
+
+    int total_height = t[2]->y - t[0]->y;
+    int seg_height = t[1]->y - t[0]->y + 1;
+    for(int y = t[0]->y; y < t[1]->y; y++){
+        float alpha = (float)(y-t[0]->y)/total_height;
+        float beta  = (float)(y-t[0]->y)/seg_height;
+        int x_alpha = t[0]->x + (t[2]->x - t[0]->x) * alpha;
+        int x_beta  = t[0]->x + (t[1]->x - t[0]->x) * beta;
+        if(x_alpha > x_beta) swap(&x_alpha, &x_beta);
+        for(int x = x_alpha; x <= x_beta; x++){
+            DRAW(x, y, color);
+        }
+    }
+
+    seg_height = t[2]->y - t[1]->y + 1;
+    for(int y = t[1]->y; y < t[2]->y; y++){
+        float alpha = (float)(y-t[0]->y)/total_height;
+        float beta  = (float)(y-t[1]->y)/seg_height;
+        int x_alpha = t[0]->x + (t[2]->x - t[0]->x) * alpha;
+        int x_beta  = t[1]->x + (t[2]->x - t[1]->x) * beta;
+        if(x_alpha > x_beta) swap(&x_alpha, &x_beta);
+        for(int x = x_alpha; x <= x_beta; x++){
+            DRAW(x, y, color);
+        }
+    }
 }
 
 void render_obj(void* data, const char * filename, int height, int width){
@@ -93,21 +126,21 @@ void render_obj(void* data, const char * filename, int height, int width){
     if(obj == (void*)0){
         return;
     }
-    vec2i_t vector0 = vec2i_create(0, 0);
-    vec2i_t vector1 = vec2i_create(0, 0);
+    vec2i_t vector[] = {vec2i_create(0, 0), vec2i_create(0, 0), vec2i_create(0, 0)};
 
     int num_faces = obj_parser_faces_size(obj);
     for (int i = 0; i < num_faces; i++) {
         int * face = obj_parser_get_face(obj, i);
-        for (int j = 0; j < 3; j++) {
-            float * v1 = obj_parser_get_vertice(obj, face[j] -1);
-            float * v2 = obj_parser_get_vertice(obj, face[(j+1) % 3] -1);
-            vec2i_modify(vector0, (v1[0]+1.)*width/2., (v1[1]+1.)*height/2.);
-            vec2i_modify(vector1, (v2[0]+1.)*width/2., (v2[1]+1.)*height/2.);
-            draw_line(data, vector0, vector1, 0xFFFFFF);
-        }
+        float * v1 = obj_parser_get_vertice(obj, face[0] -1);
+        float * v2 = obj_parser_get_vertice(obj, face[1] -1);
+        float * v3 = obj_parser_get_vertice(obj, face[2] -1);
+        vec2i_modify(vector[0], (v1[0]+1.)*width/2., (v1[1]+1.)*height/2.);
+        vec2i_modify(vector[1], (v2[0]+1.)*width/2., (v2[1]+1.)*height/2.);
+        vec2i_modify(vector[2], (v3[0]+1.)*width/2., (v3[1]+1.)*height/2.);
+        draw_triangle(data, vector, 0x010101 + (i << 8) + (i << 16) + i);
     }
-    vec2i_destroy(vector0);
-    vec2i_destroy(vector1);
+    vec2i_destroy(vector[0]);
+    vec2i_destroy(vector[1]);
+    vec2i_destroy(vector[2]);
     obj_parser_destroy(obj);
 }
